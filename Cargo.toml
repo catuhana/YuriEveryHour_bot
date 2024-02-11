@@ -5,3 +5,10 @@ version = "0.0.0"
 edition = "2021"
 rust-version = "1.76.0"
 authors = ["tuhana <hi@tuhana.me>"]
+
+[dependencies]
+clap = { version = "4.5.0", features = ["env", "derive"] }
+dirs = "5.0.1"
+figment = { version = "0.10.14", features = ["env", "yaml"] }
+figment_file_provider_adapter = "0.1.1"
+serde = { version = "1.0.196", features = ["derive"] }
