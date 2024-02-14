@@ -5,6 +5,7 @@ use serenity::{
 };
 
 mod ping;
+mod yuri;
 
 pub trait YuriInteraction {
     fn register() -> CreateCommand<'static>;
@@ -17,7 +18,10 @@ pub trait YuriInteraction {
 }
 
 pub async fn register_interactions(guild_id: GuildId, context: &Context) {
-    let interactions = &[ping::PingInteraction::register()];
+    let interactions = &[
+        ping::PingInteraction::register(),
+        yuri::YuriCInteraction::register(),
+    ];
 
     if let Err(error) = guild_id.set_commands(&context.http, interactions).await {
         error!("an error ocurred while registering guild interactions: {error:#?}")
@@ -34,6 +38,7 @@ pub async fn run_interactions(
 ) -> anyhow::Result<()> {
     match command_name {
         "ping" => ping::PingInteraction::run(context, interaction, options).await,
+        "yuri" => yuri::YuriCInteraction::run(context, interaction, options).await,
         _ => Ok(()),
     }
 }

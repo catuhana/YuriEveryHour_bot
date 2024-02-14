@@ -1,3 +1,5 @@
+// TODO: Silly-ify responses of the bot!
+
 use serenity::{
     all::{GatewayIntents, GuildId},
     Client,

@@ -16,8 +16,10 @@ figment_file_provider_adapter = "0.1.1"
 serde = { version = "1.0.196", features = ["derive"] }
 serenity = { git = "https://github.com/serenity-rs/serenity", branch = "next", version = "0.12.0", features = [
   "client",
+  "collector",
   "gateway",
   "model",
+  "utils",
 ] }
 tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros"] }
 tracing = "0.1.40"
