@@ -62,5 +62,5 @@ jobs:
         run: cargo +${{ matrix.rust-toolchain }} fmt --verbose --all --check
 
       - name: Check code lint
-        if: !cancelled()
+        if: '!cancelled()'
         run: cargo +${{ matrix.rust-toolchain }} clippy --verbose -- -W clippy::nursery
