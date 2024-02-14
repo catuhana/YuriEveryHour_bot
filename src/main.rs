@@ -24,12 +24,9 @@ async fn main() -> anyhow::Result<()> {
 
     match cli::Cli::parse().subcommand {
         cli::SubCommands::Start { config } => {
-            // TODO: Some things does not work as intended, probably related to library
-            // and created an issue for it already. Check and remove this comment after
-            // fix.
             let config = Figment::new()
                 .merge(FileAdapter::wrap(Yaml::file(config)).with_suffix("-file"))
-                .merge(FileAdapter::wrap(Env::raw()))
+                .merge(FileAdapter::wrap(Env::raw().split("__")))
                 .extract::<config::Config>()?;
 
             discord::YuriDiscord::from(config.discord).spawn().await?;
