@@ -7,8 +7,18 @@ rust-version = "1.76.0"
 authors = ["tuhana <hi@tuhana.me>"]
 
 [dependencies]
+anyhow = "1.0.79"
+async-trait = "0.1.77"
 clap = { version = "4.5.0", features = ["env", "derive"] }
 dirs = "5.0.1"
 figment = { version = "0.10.14", features = ["env", "yaml"] }
 figment_file_provider_adapter = "0.1.1"
 serde = { version = "1.0.196", features = ["derive"] }
+serenity = { git = "https://github.com/serenity-rs/serenity", branch = "next", version = "0.12.0", features = [
+  "client",
+  "gateway",
+  "model",
+] }
+tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }

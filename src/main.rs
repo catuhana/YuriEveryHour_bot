@@ -4,10 +4,24 @@ use figment::{
     Figment,
 };
 use figment_file_provider_adapter::FileAdapter;
+use tracing_subscriber::EnvFilter;
 
 mod cli;
 mod config;
-fn main() {
+mod discord;
+
+#[macro_use]
+extern crate tracing;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| EnvFilter::new("yuri_every_hour_bot=info")),
+        )
+        .init();
+
     match cli::Cli::parse().subcommand {
         cli::SubCommands::Start { config } => {
             // TODO: Some things does not work as intended, probably related to library
@@ -16,16 +30,11 @@ fn main() {
             let config = Figment::new()
                 .merge(FileAdapter::wrap(Yaml::file(config)).with_suffix("-file"))
                 .merge(FileAdapter::wrap(Env::raw()))
-                .extract::<config::Config>();
+                .extract::<config::Config>()?;
 
-            match config {
-                Ok(config) => {
-                    dbg!(config);
-                }
-                Err(error) => {
-                    eprintln!("Error: {error}")
-                }
-            }
+            discord::YuriDiscord::from(config.discord).spawn().await?;
         }
     }
+
+    Ok(())
 }
