@@ -4,6 +4,7 @@ use serenity::{
     client::Context,
     http::CacheHttp,
 };
+use sqlx::PgPool;
 
 use super::YuriInteraction;
 
@@ -15,6 +16,7 @@ impl YuriInteraction for PingInteraction {
 
     async fn run(
         context: &Context,
+        _database: PgPool,
         interaction: &CommandInteraction,
         _options: &[ResolvedOption<'_>],
     ) -> anyhow::Result<()> {

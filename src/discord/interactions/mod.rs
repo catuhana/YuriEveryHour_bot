@@ -3,6 +3,7 @@ use serenity::{
     builder::CreateCommand,
     client::Context,
 };
+use sqlx::PgPool;
 
 mod ping;
 mod yuri;
@@ -12,6 +13,7 @@ pub trait YuriInteraction {
 
     async fn run(
         context: &Context,
+        database: PgPool,
         interaction: &CommandInteraction,
         options: &[ResolvedOption],
     ) -> anyhow::Result<()>;
@@ -33,12 +35,13 @@ pub async fn register_interactions(guild_id: GuildId, context: &Context) {
 pub async fn run_interactions(
     command_name: &str,
     context: &Context,
+    database: PgPool,
     interaction: &CommandInteraction,
     options: &[ResolvedOption<'_>],
 ) -> anyhow::Result<()> {
     match command_name {
-        "ping" => ping::PingInteraction::run(context, interaction, options).await,
-        "yuri" => yuri::YuriCInteraction::run(context, interaction, options).await,
+        "ping" => ping::PingInteraction::run(context, database, interaction, options).await,
+        "yuri" => yuri::YuriCInteraction::run(context, database, interaction, options).await,
         _ => Ok(()),
     }
 }

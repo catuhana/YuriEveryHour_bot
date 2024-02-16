@@ -8,6 +8,7 @@ use serenity::{
     http::CacheHttp,
     utils::CreateQuickModal,
 };
+use sqlx::PgPool;
 
 use super::YuriInteraction;
 
@@ -25,6 +26,7 @@ impl YuriInteraction for YuriCInteraction {
 
     async fn run(
         context: &Context,
+        database: PgPool,
         interaction: &CommandInteraction,
         options: &[ResolvedOption<'_>],
     ) -> anyhow::Result<()> {
@@ -32,37 +34,63 @@ impl YuriInteraction for YuriCInteraction {
             .quick_modal(
                 context,
                 CreateQuickModal::new("Submit Yuri")
-                    .short_field("Artist's Link")
-                    .short_field("Content's Link")
+                    .short_field("Artist's Name or Link")
+                    .short_field("Art's Link")
                     .paragraph_field("Additional Context"),
             )
             .await?
         {
-            let sample = {
+            let (artist, art_link, additional_context) = {
+                let inputs = modal_response.inputs.clone();
+                (
+                    inputs[0].to_string(),
+                    inputs[1].to_string(),
+                    inputs[2].to_string(),
+                )
+            };
+            let sample_image_url = {
                 if let Some(ResolvedOption {
                     value: ResolvedValue::Attachment(sample),
                     ..
                 }) = options.first()
                 {
-                    Some(sample)
+                    Some(sample.url.to_string())
                 } else {
                     None
                 }
             };
+            let submitter_id = i64::from(interaction.user.id);
 
-            modal_response
-                .interaction
-                .create_response(
+            if let Err(error) = sqlx::query!(
+                r#"
+                INSERT INTO submissions(user_id, artist, art_link, additional_context, sample_image_url)
+                VALUES($1, $2, $3, $4, $5)
+            "#, submitter_id, artist, art_link, additional_context, sample_image_url
+            )
+            .execute(&database)
+            .await {
+                error!("rrror submitting Yuri addition: {:#?}", error);
+                modal_response.interaction.create_response(
                     context.http(),
                     CreateInteractionResponse::Message(
                         CreateInteractionResponseMessage::new()
-                            .content("Submitted Yuri addition! After being checked, it will be posted to the votes channel for public approval.")
+                            .content("An error occurred while submitting your Yuri addition. Please try again later.")
                             .ephemeral(true),
                     ),
-                )
-                .await?;
-
-            dbg!("{:#?}{:#?}", sample, modal_response.inputs);
+                ).await?;
+            } else {
+                modal_response
+                    .interaction
+                    .create_response(
+                        context.http(),
+                        CreateInteractionResponse::Message(
+                            CreateInteractionResponseMessage::new()
+                                .content("Submitted Yuri addition! After being checked, it will be posted to the votes channel for public approval.")
+                                .ephemeral(true),
+                        ),
+                    )
+                    .await?
+            }
         }
 
         Ok(())

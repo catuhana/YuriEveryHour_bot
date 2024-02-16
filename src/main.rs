@@ -4,6 +4,7 @@ use figment::{
     Figment,
 };
 use figment_file_provider_adapter::FileAdapter;
+use sqlx::PgPool;
 use tracing_subscriber::EnvFilter;
 
 mod cli;
@@ -29,7 +30,12 @@ async fn main() -> anyhow::Result<()> {
                 .merge(FileAdapter::wrap(Env::raw().split("__")))
                 .extract::<config::Config>()?;
 
-            discord::YuriDiscord::from(config.discord).spawn().await?;
+            let sqlite_pool = PgPool::connect(&config.database.url).await?;
+            sqlx::migrate!().run(&sqlite_pool).await?;
+
+            discord::YuriDiscord::new(config.discord, sqlite_pool)
+                .spawn()
+                .await?;
         }
     }
 

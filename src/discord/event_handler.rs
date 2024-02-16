@@ -1,12 +1,14 @@
 use serenity::all::{GuildId, Interaction};
 use serenity::client::{Context, EventHandler};
 use serenity::model::gateway::Ready;
+use sqlx::PgPool;
 
 use super::interactions::{register_interactions, run_interactions};
 use super::YuriDiscord;
 
 pub struct Handler {
     pub server_id: GuildId,
+    pub database: PgPool,
 }
 
 #[async_trait::async_trait]
@@ -22,6 +24,7 @@ impl EventHandler for Handler {
             if let Err(error) = run_interactions(
                 command.data.name.as_str(),
                 context,
+                self.database.clone(),
                 command,
                 &command.data.options(),
             )
@@ -37,9 +40,10 @@ impl EventHandler for Handler {
 }
 
 impl From<YuriDiscord> for Handler {
-    fn from(value: YuriDiscord) -> Self {
+    fn from(discord: YuriDiscord) -> Self {
         Self {
-            server_id: value.server_id,
+            server_id: discord.server_id,
+            database: discord.database,
         }
     }
 }
