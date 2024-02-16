@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use serenity::{
     all::{CommandInteraction, CommandOptionType, ResolvedOption, ResolvedValue},
     builder::{
@@ -8,7 +10,8 @@ use serenity::{
     http::CacheHttp,
     utils::CreateQuickModal,
 };
-use sqlx::PgPool;
+
+use crate::discord::YuriState;
 
 use super::YuriInteraction;
 
@@ -26,8 +29,8 @@ impl YuriInteraction for YuriCInteraction {
 
     async fn run(
         context: &Context,
-        database: PgPool,
         interaction: &CommandInteraction,
+        state: Arc<YuriState>,
         options: &[ResolvedOption<'_>],
     ) -> anyhow::Result<()> {
         if let Some(modal_response) = interaction
@@ -67,9 +70,9 @@ impl YuriInteraction for YuriCInteraction {
                 VALUES($1, $2, $3, $4, $5)
             "#, submitter_id, artist, art_link, additional_context, sample_image_url
             )
-            .execute(&database)
+            .execute(&state.database)
             .await {
-                error!("rrror submitting Yuri addition: {:#?}", error);
+                error!("error submitting Yuri addition: {:#?}", error);
                 modal_response.interaction.create_response(
                     context.http(),
                     CreateInteractionResponse::Message(

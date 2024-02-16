@@ -20,6 +20,15 @@ pub struct DiscordConfig {
     pub token: String,
     #[serde(alias = "server-id")]
     pub server_id: u64,
+    pub channel: DiscordChannelConfig,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DiscordChannelConfig {
+    #[serde(alias = "approve-id")]
+    pub approve_id: u64,
+    #[serde(alias = "vote-id")]
+    pub vote_id: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

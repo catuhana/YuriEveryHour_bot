@@ -1,10 +1,13 @@
+use std::sync::Arc;
+
 use serenity::{
     all::{CommandInteraction, ResolvedOption},
     builder::{CreateCommand, CreateInteractionResponse, CreateInteractionResponseMessage},
     client::Context,
     http::CacheHttp,
 };
-use sqlx::PgPool;
+
+use crate::discord::YuriState;
 
 use super::YuriInteraction;
 
@@ -16,8 +19,8 @@ impl YuriInteraction for PingInteraction {
 
     async fn run(
         context: &Context,
-        _database: PgPool,
         interaction: &CommandInteraction,
+        _state: Arc<YuriState>,
         _options: &[ResolvedOption<'_>],
     ) -> anyhow::Result<()> {
         interaction
