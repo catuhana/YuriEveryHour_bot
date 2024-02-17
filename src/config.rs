@@ -20,7 +20,8 @@ pub struct DiscordConfig {
     pub token: String,
     #[serde(alias = "server-id")]
     pub server_id: u64,
-    pub channel: DiscordChannelConfig,
+    pub team: Vec<u64>,
+    pub channels: DiscordChannelConfig,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

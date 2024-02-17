@@ -21,17 +21,19 @@ pub struct YuriDiscord {
 pub struct YuriState {
     pub server_id: GuildId,
     pub channels: DiscordChannelConfig,
+    pub team: Vec<u64>,
     pub database: PgPool,
 }
 
 impl YuriDiscord {
-    pub fn new(config: DiscordConfig, database: PgPool) -> Self {
+    pub fn new(discord_config: DiscordConfig, database: PgPool) -> Self {
         Self {
-            token: config.token,
+            token: discord_config.token,
             state: Arc::new(YuriState {
-                channels: config.channel,
+                channels: discord_config.channels,
                 database,
-                server_id: config.server_id.into(),
+                team: discord_config.team,
+                server_id: discord_config.server_id.into(),
             }),
         }
     }

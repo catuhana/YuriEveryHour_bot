@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS submissions (
 
     artist TEXT NOT NULL,
     art_link TEXT NOT NULL,
-    additional_context TEXT,
+    additional_information TEXT,
 
     sample_image_url TEXT,
 

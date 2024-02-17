@@ -1,15 +1,20 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use serenity::{
-    all::{CommandInteraction, CommandOptionType, ResolvedOption, ResolvedValue},
+    all::{
+        ButtonStyle, ChannelId, CommandInteraction, CommandOptionType, ComponentInteractionDataKind, Mention, ResolvedOption, ResolvedValue
+    },
     builder::{
-        CreateCommand, CreateCommandOption, CreateInteractionResponse,
-        CreateInteractionResponseMessage,
+        CreateActionRow, CreateButton, CreateCommand, CreateCommandOption, CreateEmbed,
+        CreateEmbedAuthor, CreateInteractionResponse, CreateInteractionResponseMessage,
+        CreateMessage, EditMessage,
     },
     client::Context,
     http::CacheHttp,
+    model::{Colour, Timestamp},
     utils::CreateQuickModal,
 };
+use tokio::task::JoinHandle;
 
 use crate::discord::YuriState;
 
@@ -39,62 +44,166 @@ impl YuriInteraction for YuriCInteraction {
                 CreateQuickModal::new("Submit Yuri")
                     .short_field("Artist's Name or Link")
                     .short_field("Art's Link")
-                    .paragraph_field("Additional Context"),
+                    .paragraph_field("Additional Information"),
             )
             .await?
         {
-            let (artist, art_link, additional_context) = {
-                let inputs = modal_response.inputs.clone();
+            let (artist, art_link, additional_information, sample_image) = {
+                let inputs = modal_response.inputs;
+
                 (
                     inputs[0].to_string(),
                     inputs[1].to_string(),
                     inputs[2].to_string(),
+                    options.first().and_then(|option| {
+                        if let ResolvedValue::Attachment(attachment) = option.value {
+                            Some(attachment.url.to_string())
+                        } else {
+                            None
+                        }
+                    }),
                 )
             };
-            let sample_image_url = {
-                if let Some(ResolvedOption {
-                    value: ResolvedValue::Attachment(sample),
-                    ..
-                }) = options.first()
-                {
-                    Some(sample.url.to_string())
-                } else {
-                    None
-                }
-            };
-            let submitter_id = i64::from(interaction.user.id);
 
-            if let Err(error) = sqlx::query!(
-                r#"
-                INSERT INTO submissions(user_id, artist, art_link, additional_context, sample_image_url)
-                VALUES($1, $2, $3, $4, $5)
-            "#, submitter_id, artist, art_link, additional_context, sample_image_url
+            match sqlx::query!(
+                "INSERT INTO submissions(user_id, artist, art_link, additional_information, sample_image_url) VALUES($1, $2, $3, $4, $5) RETURNING submission_id",
+                i64::from(interaction.user.id),
+                artist,
+                art_link,
+                additional_information,
+                sample_image
             )
-            .execute(&state.database)
-            .await {
-                error!("error submitting Yuri addition: {:#?}", error);
-                modal_response.interaction.create_response(
-                    context.http(),
-                    CreateInteractionResponse::Message(
-                        CreateInteractionResponseMessage::new()
-                            .content("An error occurred while submitting your Yuri addition. Please try again later.")
-                            .ephemeral(true),
-                    ),
-                ).await?;
-            } else {
-                modal_response
-                    .interaction
-                    .create_response(
+                .fetch_one(&state.database)
+                .await
+            {
+                Ok(submission_table) => {
+                    let embed: Arc<CreateEmbed> = CreateEmbed::new()
+                        .author(CreateEmbedAuthor::new(format!(
+                            "Submitted by {}",
+                            interaction.user.tag()
+                        )))
+                        .timestamp(Timestamp::now())
+                        .fields(vec![
+                            ("Artist", artist, true),
+                            ("Art Link", art_link, true),
+                            ("Additional Information", additional_information, false),
+                        ])
+                        .image(sample_image.unwrap_or_default())
+                        .into();
+
+                    let mut submission_approval = ChannelId::new(state.channels.approve_id)
+                        .send_message(
+                            context.http(),
+                            CreateMessage::new()
+                                .content("New Yuri Submission!")
+                                .embed((*embed).clone())
+                                .components(vec![CreateActionRow::Buttons(vec![
+                                    CreateButton::new("approve")
+                                        .label("Approve")
+                                        .style(ButtonStyle::Success),
+                                    CreateButton::new("reject")
+                                        .label("Reject")
+                                        .style(ButtonStyle::Danger),
+                                ])]),
+                        )
+                        .await?;
+
+                        let task_context: Arc<Context> = context.clone().into();
+                        let task_state = state.clone();
+                        let _task: JoinHandle<anyhow::Result<()>> = tokio::spawn(async move {
+                            loop {
+                                if let Some(submission_choice) = match submission_approval
+                                    .await_component_interaction(task_context.shard.clone())
+                                    .timeout(Duration::from_secs(86_400))
+                                    .await
+                                {
+                                    Some(interaction) => {
+                                        if task_state.team.iter().any(|id| *id == interaction.user.id.get()) {
+                                            match &interaction.data.kind {
+                                                ComponentInteractionDataKind::Button => {
+                                                    Some(interaction.data.custom_id.to_string())
+                                                }
+                                                _ => None,
+                                            }
+                                        } else {
+                                            interaction
+                                                .create_response(
+                                                    task_context.http(),
+                                                    CreateInteractionResponse::Message(
+                                                        CreateInteractionResponseMessage::new()
+                                                            .content("You don't have enough permissions to do that.")
+                                                            .ephemeral(true),
+                                                    ),
+                                                )
+                                                .await?;
+                                            continue;
+                                        }
+                                    }
+                                    None => break,
+                                } {
+                                    if &submission_choice == "approve" {
+                                        sqlx::query!("UPDATE submissions SET approved = true WHERE submission_id = $1", submission_table.submission_id)
+                                            .execute(&task_state.database)
+                                            .await?;
+
+                                        submission_approval
+                                            .edit(
+                                                task_context.http(),
+                                                EditMessage::new()
+                                                    .embed(
+                                                        (*embed)
+                                                            .clone()
+                                                            .title("Approved!")
+                                                            .colour(Colour::DARK_GREEN),
+                                                    )
+                                                    .components(vec![]),
+                                            )
+                                            .await?;
+                                    } else {
+                                        sqlx::query!("UPDATE submissions SET rejected = true WHERE submission_id = $1", submission_table.submission_id)
+                                            .execute(&task_state.database)
+                                            .await?;
+
+                                        submission_approval
+                                            .edit(
+                                                task_context.http(),
+                                                EditMessage::new()
+                                                    .embed((*embed).clone().title("Rejected!").colour(Colour::DARK_RED))
+                                                    .components(vec![]),
+                                            )
+                                            .await?;
+                                    }
+                                };
+                            }
+                        
+                            Ok(())
+                        });
+
+                        modal_response
+                            .interaction
+                            .create_response(
+                                context.http(),
+                                CreateInteractionResponse::Message(
+                                    CreateInteractionResponseMessage::new()
+                                        .content(format!("Your Yuri addition has been submitted for review! After being approved, it will be posted to {} for public voting.", Mention::from(ChannelId::new(state.channels.vote_id))))
+                                        .ephemeral(true),
+                                ),
+                            )
+                            .await?;
+                    },
+                Err(error) => {
+                    error!("error submitting Yuri addition: {:#?}", error);
+                    modal_response.interaction.create_response(
                         context.http(),
                         CreateInteractionResponse::Message(
                             CreateInteractionResponseMessage::new()
-                                .content("Submitted Yuri addition! After being checked, it will be posted to the votes channel for public approval.")
+                                .content("An error occurred while submitting your Yuri addition, please try again.")
                                 .ephemeral(true),
                         ),
-                    )
-                    .await?
+                    ).await?;
+                }
             }
-        }
+        };
 
         Ok(())
     }
