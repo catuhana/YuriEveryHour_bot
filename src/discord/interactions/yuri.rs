@@ -2,7 +2,8 @@ use std::{sync::Arc, time::Duration};
 
 use serenity::{
     all::{
-        ButtonStyle, ChannelId, CommandInteraction, CommandOptionType, ComponentInteractionDataKind, Mention, ResolvedOption, ResolvedValue
+        ButtonStyle, ChannelId, CommandInteraction, CommandOptionType,
+        ComponentInteractionDataKind, Mention, ResolvedOption, ResolvedValue,
     },
     builder::{
         CreateActionRow, CreateButton, CreateCommand, CreateCommandOption, CreateEmbed,
@@ -175,7 +176,7 @@ impl YuriInteraction for YuriCInteraction {
                                     }
                                 };
                             }
-                        
+
                             Ok(())
                         });
 
