@@ -109,11 +109,15 @@ impl YuriInteraction for YuriCInteraction {
                         )
                         .await?;
 
+                        sqlx::query!("INSERT INTO pending_approvals(submission_id, message_id) VALUES($1, $2)", submission_table.submission_id, i64::from(submission_approval.id))
+                            .execute(&state.database)
+                            .await?;
+
                         let task_context: Arc<Context> = context.clone().into();
                         let task_state = state.clone();
                         let _task: JoinHandle<anyhow::Result<()>> = tokio::spawn(async move {
                             loop {
-                                if let Some(submission_choice) = match submission_approval
+                                if let Some(submission_interaction) = match submission_approval
                                     .await_component_interaction(task_context.shard.clone())
                                     .timeout(Duration::from_secs(86_400))
                                     .await
@@ -122,7 +126,7 @@ impl YuriInteraction for YuriCInteraction {
                                         if task_state.team.iter().any(|id| *id == interaction.user.id.get()) {
                                             match &interaction.data.kind {
                                                 ComponentInteractionDataKind::Button => {
-                                                    Some(interaction.data.custom_id.to_string())
+                                                    Some(interaction)
                                                 }
                                                 _ => None,
                                             }
@@ -142,10 +146,15 @@ impl YuriInteraction for YuriCInteraction {
                                     }
                                     None => break,
                                 } {
-                                    if &submission_choice == "approve" {
-                                        sqlx::query!("UPDATE submissions SET decision = 'approved', pending_approval = FALSE, submission_decision_date = NOW() WHERE submission_id = $1", submission_table.submission_id)
-                                            .execute(&task_state.database)
+                                    if &submission_interaction.data.custom_id.to_string() == "approve" {
+                                        let mut tx = task_state.database.begin().await?;
+                                        sqlx::query!("UPDATE submissions SET decision = 'approved', submission_decision_date = NOW() WHERE submission_id = $1", submission_table.submission_id)
+                                            .execute(&mut *tx)
                                             .await?;
+                                        sqlx::query!("DELETE FROM pending_approvals WHERE submission_id = $1", submission_table.submission_id)
+                                            .execute(&mut *tx)
+                                            .await?;
+                                        tx.commit().await?;
 
                                         submission_approval
                                             .edit(
@@ -154,22 +163,27 @@ impl YuriInteraction for YuriCInteraction {
                                                     .embed(
                                                         (*embed)
                                                             .clone()
-                                                            .title("Approved!")
+                                                            .title(format!("Approved by {}!", submission_interaction.user.tag()))
                                                             .colour(Colour::DARK_GREEN),
                                                     )
                                                     .components(vec![]),
                                             )
                                             .await?;
                                     } else {
-                                        sqlx::query!("UPDATE submissions SET decision = 'rejected', pending_approval = FALSE, submission_decision_date = NOW() WHERE submission_id = $1", submission_table.submission_id)
+                                        let mut tx = task_state.database.begin().await?;
+                                        sqlx::query!("UPDATE submissions SET decision = 'rejected', submission_decision_date = NOW() WHERE submission_id = $1", submission_table.submission_id)
                                             .execute(&task_state.database)
                                             .await?;
+                                        sqlx::query!("DELETE FROM pending_approvals WHERE submission_id = $1", submission_table.submission_id)
+                                            .execute(&mut *tx)
+                                            .await?;
+                                        tx.commit().await?;
 
                                         submission_approval
                                             .edit(
                                                 task_context.http(),
                                                 EditMessage::new()
-                                                    .embed((*embed).clone().title("Rejected!").colour(Colour::DARK_RED))
+                                                    .embed((*embed).clone().title(format!("Rejected by {}!", submission_interaction.user.tag())).colour(Colour::DARK_RED))
                                                     .components(vec![]),
                                             )
                                             .await?;

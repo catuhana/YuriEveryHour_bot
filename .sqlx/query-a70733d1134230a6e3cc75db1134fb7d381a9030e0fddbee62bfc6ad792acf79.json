@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO pending_approvals(submission_id, message_id) VALUES($1, $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a70733d1134230a6e3cc75db1134fb7d381a9030e0fddbee62bfc6ad792acf79"
+}
