@@ -142,7 +142,7 @@ impl YuriInteraction for YuriCInteraction {
                                     None => break,
                                 } {
                                     if &submission_choice == "approve" {
-                                        sqlx::query!("UPDATE submissions SET approved = true WHERE submission_id = $1", submission_table.submission_id)
+                                        sqlx::query!("UPDATE submissions SET decision = 'approved', pending_approval = FALSE, submission_decision_date = NOW() WHERE submission_id = $1", submission_table.submission_id)
                                             .execute(&task_state.database)
                                             .await?;
 
@@ -160,7 +160,7 @@ impl YuriInteraction for YuriCInteraction {
                                             )
                                             .await?;
                                     } else {
-                                        sqlx::query!("UPDATE submissions SET rejected = true WHERE submission_id = $1", submission_table.submission_id)
+                                        sqlx::query!("UPDATE submissions SET decision = 'rejected', pending_approval = FALSE, submission_decision_date = NOW() WHERE submission_id = $1", submission_table.submission_id)
                                             .execute(&task_state.database)
                                             .await?;
 

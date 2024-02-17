@@ -1,3 +1,5 @@
+CREATE TYPE submission_decision AS ENUM ('approved', 'rejected');
+
 CREATE TABLE IF NOT EXISTS submissions (
     submission_id SERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -8,10 +10,11 @@ CREATE TABLE IF NOT EXISTS submissions (
 
     sample_image_url TEXT,
 
-    approved BOOLEAN NOT NULL DEFAULT FALSE,
+    pending_approval BOOLEAN NOT NULL DEFAULT TRUE,
+    decision submission_decision NOT NULL,
 
     submission_date TIMESTAMP NOT NULL DEFAULT NOW(),
-    submission_accept_date TIMESTAMP
+    submission_decision_date TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS votes (
