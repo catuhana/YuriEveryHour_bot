@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE submissions SET decision = 'approved', pending_approval = FALSE, submission_decision_date = NOW() WHERE submission_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0950860cbe776a9a3a6fa2264ad23e1332dba886c7d03328503cff766d3f92d7"
+}
