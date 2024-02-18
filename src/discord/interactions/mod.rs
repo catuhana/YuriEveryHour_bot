@@ -9,7 +9,7 @@ use serenity::{
 use super::YuriState;
 
 mod ping;
-mod yuri;
+pub mod yuri;
 
 pub trait YuriInteraction {
     fn register() -> CreateCommand<'static>;

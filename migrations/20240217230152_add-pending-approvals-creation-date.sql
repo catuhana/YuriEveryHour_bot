@@ -1,0 +1,2 @@
+ALTER TABLE pending_approvals
+  ADD COLUMN date TIMESTAMP NOT NULL DEFAULT NOW();

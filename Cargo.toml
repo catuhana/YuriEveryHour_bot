@@ -21,7 +21,8 @@ serenity = { git = "https://github.com/serenity-rs/serenity", branch = "next", v
   "model",
   "utils",
 ] }
-sqlx = { version = "0.7.3", features = ["postgres", "runtime-tokio"] }
+sqlx = { version = "0.7.3", features = ["postgres", "runtime-tokio", "time"] }
+time = "0.3.34"
 tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros"] }
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }

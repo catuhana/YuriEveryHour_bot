@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT user_id, artist, art_link, additional_information, sample_image_url FROM submissions WHERE submission_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "artist",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "art_link",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "additional_information",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "sample_image_url",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "da4beb6fa6b77dd62dd1b8907544c72fd1a6d8abab1997fb69ee5eefaf86c789"
+}
