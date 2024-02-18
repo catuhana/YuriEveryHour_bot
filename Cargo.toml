@@ -6,6 +6,10 @@ edition = "2021"
 rust-version = "1.76.0"
 authors = ["tuhana <hi@tuhana.me>"]
 
+[profile.release]
+strip = "symbols"
+lto = "thin"
+
 [dependencies]
 anyhow = "1.0.79"
 async-trait = "0.1.77"
