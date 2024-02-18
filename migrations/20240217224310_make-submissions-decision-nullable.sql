@@ -1,2 +1,2 @@
 ALTER TABLE submissions
-  ALTER COLUMN decision DROP NOT NULL;
+    ALTER COLUMN decision DROP NOT NULL;
