@@ -46,9 +46,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set-up Rust problem matchers
-        uses: r7kamura/rust-problem-matchers@main
+        uses: catuhana/rust-problem-matchers@v1
 
-      - name: Setup or update Rust ${{ matrix.rust-toolchain }} toolchain
+      - name: Set-up or update Rust ${{ matrix.rust-toolchain }} toolchain
         run: rustup toolchain install ${{ matrix.rust-toolchain }} --profile default
 
       - name: Set-up Rust cache
