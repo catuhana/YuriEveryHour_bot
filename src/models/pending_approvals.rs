@@ -136,10 +136,10 @@ pub trait PendingApprovalsHelpers {
     async fn populate_pending_approvals(&mut self, executor: impl PgExecutor)
         -> anyhow::Result<()>;
 
-    async fn depopulate_expired_approvals(
-        &mut self,
-        executor: impl PgExecutor,
-    ) -> anyhow::Result<()>;
+    // async fn depopulate_expired_approvals(
+    //     &mut self,
+    //     executor: impl PgExecutor,
+    // ) -> anyhow::Result<()>;
 }
 
 impl PendingApprovalsHelpers for PendingApprovals {
@@ -183,16 +183,16 @@ impl PendingApprovalsHelpers for PendingApprovals {
         Ok(())
     }
 
-    async fn depopulate_expired_approvals(
-        &mut self,
-        executor: impl PgExecutor<'_>,
-    ) -> anyhow::Result<()> {
-        debug!("depopulating expired approvals");
+    // async fn depopulate_expired_approvals(
+    //     &mut self,
+    //     executor: impl PgExecutor<'_>,
+    // ) -> anyhow::Result<()> {
+    //     debug!("depopulating expired approvals");
 
-        let deleted_approvals = PendingApproval::remove_expired_approvals(executor).await?;
-        self.retain(|approval| !deleted_approvals.contains(approval));
+    //     let deleted_approvals = PendingApproval::remove_expired_approvals(executor).await?;
+    //     self.retain(|approval| !deleted_approvals.contains(approval));
 
-        debug!("depopulated expired approvals");
-        Ok(())
-    }
+    //     debug!("depopulated expired approvals");
+    //     Ok(())
+    // }
 }
