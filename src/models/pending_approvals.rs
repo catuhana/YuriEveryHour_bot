@@ -28,6 +28,10 @@ pub trait PendingApprovalHelpers {
         executor: impl PgExecutor,
         remove_pending_approval: RemovePendingApproval,
     ) -> anyhow::Result<PendingApproval>;
+
+    async fn remove_expired_approvals(
+        executor: impl PgExecutor,
+    ) -> anyhow::Result<Vec<PendingApproval>>;
 }
 
 impl PendingApprovalHelpers for PendingApproval {
@@ -47,8 +51,9 @@ impl PendingApprovalHelpers for PendingApproval {
             .await?;
 
         debug!(
-            "added a new pending approval with: `submission_id`: {}, `message_id`: {}",
-            added_approval.submission_id, added_approval.message_id
+            "added a new pending approval with: `submission_id`: {submission_id}, `message_id`: {message_id}",
+            submission_id = added_approval.submission_id,
+            message_id = added_approval.message_id
         );
         Ok(added_approval)
     }
@@ -80,10 +85,36 @@ impl PendingApprovalHelpers for PendingApproval {
         };
 
         debug!(
-            "removed a pending approval with: `submission_id`: {}, `message_id`: {}",
-            removed_approval.submission_id, removed_approval.message_id
+            "removed a pending approval with: `submission_id`: {submission_id}, `message_id`: {message_id}",
+            submission_id = removed_approval.submission_id,
+            message_id = removed_approval.message_id
         );
         Ok(removed_approval)
+    }
+
+    async fn remove_expired_approvals(executor: impl PgExecutor<'_>) -> anyhow::Result<Vec<Self>> {
+        debug!("removing expired approvals");
+
+        let expired_approvals = sqlx::query_as!(
+            PendingApproval,
+            r#"
+            WITH deleted_approvals AS
+                (DELETE FROM pending_approvals WHERE date < NOW() - INTERVAL '1 day' RETURNING *)
+            SELECT * FROM deleted_approvals
+            "#
+        )
+        .fetch_all(executor)
+        .await?;
+
+        debug!(
+            "removed expired approvals with: `submission_id`s: {submission_ids}",
+            submission_ids = expired_approvals
+                .iter()
+                .map(|approval| approval.submission_id.to_string())
+                .collect::<Vec<String>>()
+                .join(", ")
+        );
+        Ok(expired_approvals)
     }
 }
 
@@ -95,6 +126,7 @@ pub trait PendingApprovalsHelpers {
         executor: impl PgExecutor,
         add_pending_approval: AddPendingApproval,
     ) -> anyhow::Result<()>;
+
     async fn remove_pending_approval(
         &mut self,
         executor: impl PgExecutor,
@@ -103,6 +135,7 @@ pub trait PendingApprovalsHelpers {
 
     async fn populate_pending_approvals(&mut self, executor: impl PgExecutor)
         -> anyhow::Result<()>;
+
     async fn depopulate_expired_approvals(
         &mut self,
         executor: impl PgExecutor,
@@ -156,17 +189,7 @@ impl PendingApprovalsHelpers for PendingApprovals {
     ) -> anyhow::Result<()> {
         debug!("depopulating expired approvals");
 
-        let deleted_approvals = sqlx::query_as!(
-            PendingApproval,
-            r#"
-            DELETE FROM pending_approvals
-            WHERE date < NOW() - INTERVAL '1 day'
-            RETURNING *
-        "#,
-        )
-        .fetch_all(executor)
-        .await?;
-
+        let deleted_approvals = PendingApproval::remove_expired_approvals(executor).await?;
         self.retain(|approval| !deleted_approvals.contains(approval));
 
         debug!("depopulated expired approvals");

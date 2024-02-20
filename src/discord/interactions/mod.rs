@@ -32,8 +32,8 @@ pub async fn register_interactions(guild_id: GuildId, context: &Context) {
 
     match guild_id.set_commands(context.http(), interactions).await {
         Ok(commands) => info!(
-            "registered guild interactions: {}",
-            commands
+            "registered guild interactions: {registered_interactions}",
+            registered_interactions = commands
                 .iter()
                 .map(|command| command.name.to_string())
                 .collect::<Vec<String>>()

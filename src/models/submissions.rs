@@ -105,8 +105,8 @@ impl SubmissionHelpers for Submission {
             .await?;
 
         debug!(
-            "added a new submission with: `submission_id`: {}",
-            created_submission.submission_id
+            "added a new submission with: `submission_id`: {submission_id}",
+            submission_id = created_submission.submission_id
         );
         Ok(created_submission)
     }
@@ -141,8 +141,8 @@ impl SubmissionHelpers for Submission {
         };
 
         debug!(
-            "approved a submission with: `submission_id`: {}",
-            approved_submission.submission_id
+            "approved a submission with: `submission_id`: {submission_id}",
+            submission_id = approved_submission.submission_id
         );
         Ok(approved_submission)
     }
@@ -177,8 +177,9 @@ impl SubmissionHelpers for Submission {
         };
 
         debug!(
-            "rejected a submission with: `submission_id`: {}, `user_id`: {}",
-            rejected_submission.submission_id, rejected_submission.user_id
+            "rejected a submission with: `submission_id`: {submission_id}, `user_id`: {user_id}",
+            submission_id = rejected_submission.submission_id,
+            user_id = rejected_submission.user_id
         );
         Ok(rejected_submission)
     }

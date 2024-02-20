@@ -17,8 +17,8 @@ impl Handler {
         context: &Context,
     ) -> anyhow::Result<()> {
         debug!(
-            "handling an approval with: `message_id`: {}",
-            interaction.message.id
+            "handling an approval with: `message_id`: {message_id}",
+            message_id = interaction.message.id
         );
 
         let pending_approvals = &mut self.state.data.write().await.pending_approvals;
@@ -90,7 +90,10 @@ impl Handler {
                             EditMessage::new()
                                 .embed(
                                     embed
-                                        .title(format!("Approved by {}!", interaction.user.tag()))
+                                        .title(format!(
+                                            "Approved by {user_tag}!",
+                                            user_tag = interaction.user.tag()
+                                        ))
                                         .colour(Colour::DARK_GREEN),
                                 )
                                 .components(vec![]),
@@ -117,7 +120,10 @@ impl Handler {
                             EditMessage::new()
                                 .embed(
                                     embed
-                                        .title(format!("Rejected by {}!", interaction.user.tag()))
+                                        .title(format!(
+                                            "Rejected by {user_tag}!",
+                                            user_tag = interaction.user.tag()
+                                        ))
                                         .colour(Colour::RED),
                                 )
                                 .components(vec![]),
@@ -150,8 +156,8 @@ impl Handler {
         }
 
         debug!(
-            "handled an approval with `message_id`: {}",
-            interaction.message.id
+            "handled an approval with `message_id`: {message_id}",
+            message_id = interaction.message.id
         );
         Ok(())
     }

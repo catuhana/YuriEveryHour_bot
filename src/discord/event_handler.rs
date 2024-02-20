@@ -5,7 +5,9 @@ use serenity::client::{Context, EventHandler};
 use serenity::model::gateway::Ready;
 
 use crate::discord::interactions::register_interactions;
-use crate::models::pending_approvals::PendingApprovalsHelpers;
+use crate::models::pending_approvals::{
+    PendingApproval, PendingApprovalHelpers, PendingApprovalsHelpers,
+};
 
 use super::interactions::run_interactions;
 use super::{YuriDiscord, YuriState};
@@ -17,18 +19,20 @@ pub struct Handler {
 #[async_trait::async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, context: &Context, ready: &Ready) {
-        info!("Connected to Discord as {}", ready.user.name);
+        info!(
+            "Connected to Discord as {username}",
+            username = ready.user.name
+        );
 
         register_interactions(self.state.config.server_id, context).await;
 
         {
             let pending_approvals = &mut self.state.data.write().await.pending_approvals;
 
-            if let Err(error) = pending_approvals
-                .depopulate_expired_approvals(&self.state.database)
-                .await
+            if let Err(error) =
+                PendingApproval::remove_expired_approvals(&self.state.database).await
             {
-                error!("an error ocurred while de-populating expired approvals: {error:#?}");
+                error!("an error ocurred while removing expired approvals: {error:#?}");
             }
 
             if let Err(error) = pending_approvals
@@ -53,8 +57,8 @@ impl EventHandler for Handler {
                 .await
                 {
                     error!(
-                        "an error occurred while running `{}` interaction: {error:#?}",
-                        command.data.name
+                        "an error occurred while running `{interaction_name}` interaction: {error:#?}",
+                        interaction_name = command.data.name
                     );
                 }
             }

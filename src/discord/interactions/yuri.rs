@@ -86,8 +86,8 @@ impl YuriInteraction for YuriCInteraction {
                 Ok(submission_table) => {
                     let embed = CreateEmbed::new()
                         .author(CreateEmbedAuthor::new(format!(
-                            "Submitted by {}",
-                            interaction.user.tag()
+                            "Submitted by {user_tag}",
+                            user_tag = interaction.user.tag()
                         )))
                         .timestamp(Timestamp::now())
                         .fields(vec![
@@ -141,7 +141,7 @@ impl YuriInteraction for YuriCInteraction {
                                 context.http(),
                                 CreateInteractionResponse::Message(
                                     CreateInteractionResponseMessage::new()
-                                        .content(format!("Your Yuri addition has been submitted for review! After being approved, it will be posted to {} for public voting.", Mention::from(ChannelId::new(state.config.channels.vote_id))))
+                                        .content(format!("Your Yuri addition has been submitted for review! After being approved, it will be posted to {vote_channel} for public voting.", vote_channel = Mention::from(ChannelId::new(state.config.channels.vote_id))))
                                         .ephemeral(true),
                                 ),
                             )
@@ -149,6 +149,7 @@ impl YuriInteraction for YuriCInteraction {
                 }
                 Err(error) => {
                     error!("error submitting Yuri addition: {:#?}", error);
+
                     modal_response.interaction.create_response(
                         context.http(),
                         CreateInteractionResponse::Message(
