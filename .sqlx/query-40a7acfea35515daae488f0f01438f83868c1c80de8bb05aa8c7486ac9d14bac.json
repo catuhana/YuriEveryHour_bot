@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            DELETE FROM pending_approvals\n            WHERE date < NOW() - INTERVAL '1 day'\n            RETURNING *\n        ",
+  "query": "\n            WITH deleted_approvals AS\n                (DELETE FROM pending_approvals WHERE date < NOW() - INTERVAL '1 day' RETURNING *)\n            SELECT * FROM deleted_approvals\n            ",
   "describe": {
     "columns": [
       {
@@ -28,5 +28,5 @@
       false
     ]
   },
-  "hash": "515f13b1d851c1fc70f3a7cfea7044a66828f9c983e58d48598cc4e6ba261fa3"
+  "hash": "40a7acfea35515daae488f0f01438f83868c1c80de8bb05aa8c7486ac9d14bac"
 }
