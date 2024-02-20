@@ -13,6 +13,7 @@ lto = "thin"
 [dependencies]
 anyhow = "1.0.80"
 async-trait = "0.1.77"
+chrono = "0.4.34"
 clap = { version = "4.5.1", features = ["env", "derive"] }
 dirs = "5.0.1"
 figment = { version = "0.10.14", features = ["env", "yaml"] }
@@ -25,8 +26,7 @@ serenity = { git = "https://github.com/serenity-rs/serenity", branch = "next", v
   "model",
   "utils",
 ] }
-sqlx = { version = "0.7.3", features = ["postgres", "runtime-tokio", "time"] }
-time = "0.3.34"
+sqlx = { version = "0.7.3", features = ["postgres", "runtime-tokio", "chrono"] }
 tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros"] }
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }

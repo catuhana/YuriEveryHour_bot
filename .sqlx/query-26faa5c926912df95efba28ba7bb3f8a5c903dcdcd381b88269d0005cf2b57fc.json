@@ -1,0 +1,84 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO submissions(user_id, artist, art_link, additional_information, sample_image_url)\n            VALUES ($1, $2, $3, $4, $5)\n            RETURNING submission_id, user_id, artist, art_link, additional_information, sample_image_url, decision as \"decision: SubmissionDecision\", submission_date, submission_decision_date",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "submission_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "artist",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "art_link",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "additional_information",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "sample_image_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "decision: SubmissionDecision",
+        "type_info": {
+          "Custom": {
+            "name": "submission_decision",
+            "kind": {
+              "Enum": [
+                "approved",
+                "rejected"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "submission_date",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 8,
+        "name": "submission_decision_date",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "26faa5c926912df95efba28ba7bb3f8a5c903dcdcd381b88269d0005cf2b57fc"
+}

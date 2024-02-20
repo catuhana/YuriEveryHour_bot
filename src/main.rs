@@ -10,6 +10,7 @@ use tracing_subscriber::EnvFilter;
 mod cli;
 mod config;
 mod discord;
+mod models;
 
 #[macro_use]
 extern crate tracing;
@@ -30,10 +31,10 @@ async fn main() -> anyhow::Result<()> {
                 .merge(FileAdapter::wrap(Env::raw().split("__")))
                 .extract::<config::Config>()?;
 
-            let sqlite_pool = PgPool::connect(&config.database.url).await?;
-            sqlx::migrate!().run(&sqlite_pool).await?;
+            let postgres_pool = PgPool::connect(&config.database.url).await?;
+            sqlx::migrate!().run(&postgres_pool).await?;
 
-            discord::YuriDiscord::new(config.discord, sqlite_pool)
+            discord::YuriDiscord::new(config.discord, postgres_pool)
                 .spawn()
                 .await?;
         }

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use serenity::{
-    all::{CommandInteraction, GuildId, ResolvedOption},
+    all::{CacheHttp, CommandInteraction, GuildId, ResolvedOption},
     builder::CreateCommand,
     client::Context,
 };
@@ -23,15 +23,23 @@ pub trait YuriInteraction {
 }
 
 pub async fn register_interactions(guild_id: GuildId, context: &Context) {
+    debug!("registering guild interactions");
+
     let interactions = &[
         ping::PingInteraction::register(),
         yuri::YuriCInteraction::register(),
     ];
 
-    if let Err(error) = guild_id.set_commands(&context.http, interactions).await {
-        error!("an error ocurred while registering guild interactions: {error:#?}")
-    } else {
-        debug!("registered interactions");
+    match guild_id.set_commands(context.http(), interactions).await {
+        Ok(commands) => info!(
+            "registered guild interactions: {}",
+            commands
+                .iter()
+                .map(|command| command.name.to_string())
+                .collect::<Vec<String>>()
+                .join(", ")
+        ),
+        Err(error) => error!("an error ocurred while registering guild interactions: {error:#?}"),
     }
 }
 

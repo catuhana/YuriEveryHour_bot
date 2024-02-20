@@ -3,14 +3,19 @@
 use std::sync::Arc;
 
 use serenity::{
-    all::{GatewayIntents, GuildId},
+    all::{GatewayIntents, GuildId, UserId},
     Client,
 };
 use sqlx::PgPool;
+use tokio::sync::RwLock;
 
-use crate::config::{DiscordChannelConfig, DiscordConfig};
+use crate::{
+    config::{DiscordChannelConfig, DiscordConfig},
+    models::pending_approvals::PendingApproval,
+};
 
 mod event_handler;
+mod handlers;
 mod interactions;
 
 pub struct YuriDiscord {
@@ -19,22 +24,37 @@ pub struct YuriDiscord {
 }
 
 pub struct YuriState {
-    pub server_id: GuildId,
-    pub channels: DiscordChannelConfig,
-    pub team: Vec<u64>,
     pub database: PgPool,
+    pub config: YuriConfig,
+    pub data: Arc<RwLock<YuriData>>,
+}
+
+pub struct YuriData {
+    pub pending_approvals: Vec<PendingApproval>,
+}
+
+pub struct YuriConfig {
+    pub channels: DiscordChannelConfig,
+    pub team: Vec<UserId>,
+    pub server_id: GuildId,
 }
 
 impl YuriDiscord {
     pub fn new(discord_config: DiscordConfig, database: PgPool) -> Self {
         Self {
             token: discord_config.token,
-            state: Arc::new(YuriState {
-                channels: discord_config.channels,
+            state: YuriState {
                 database,
-                team: discord_config.team,
-                server_id: discord_config.server_id.into(),
-            }),
+                config: YuriConfig {
+                    channels: discord_config.channels,
+                    team: discord_config.team.iter().map(|id| (*id).into()).collect(),
+                    server_id: discord_config.server_id.into(),
+                },
+                data: Arc::new(RwLock::new(YuriData {
+                    pending_approvals: vec![],
+                })),
+            }
+            .into(),
         }
     }
 
