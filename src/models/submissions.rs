@@ -87,7 +87,7 @@ impl SubmissionHelpers for Submission {
     async fn add_submission(
         executor: impl PgExecutor<'_>,
         submission: AddSubmission,
-    ) -> anyhow::Result<Submission> {
+    ) -> anyhow::Result<Self> {
         debug!("adding a new submission");
 
         let created_submission = sqlx::query_as!(
@@ -114,7 +114,7 @@ impl SubmissionHelpers for Submission {
     async fn approve_submission(
         executor: impl PgExecutor<'_>,
         approve_submission: SubmissionIds,
-    ) -> anyhow::Result<Submission> {
+    ) -> anyhow::Result<Self> {
         debug!("approving a submission");
 
         let approved_submission = match approve_submission {
@@ -150,7 +150,7 @@ impl SubmissionHelpers for Submission {
     async fn reject_submission(
         executor: impl PgExecutor<'_>,
         submission_id: SubmissionIds,
-    ) -> anyhow::Result<Submission> {
+    ) -> anyhow::Result<Self> {
         debug!("rejecting a submission");
 
         let rejected_submission = match submission_id {

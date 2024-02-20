@@ -34,7 +34,7 @@ impl PendingApprovalHelpers for PendingApproval {
     async fn add_pending_approval(
         executor: impl PgExecutor<'_>,
         add_pending_approval: AddPendingApproval,
-    ) -> anyhow::Result<PendingApproval> {
+    ) -> anyhow::Result<Self> {
         debug!("adding a new pending approval");
 
         let added_approval =
@@ -56,7 +56,7 @@ impl PendingApprovalHelpers for PendingApproval {
     async fn remove_pending_approval(
         executor: impl PgExecutor<'_>,
         remove_pending_approval: RemovePendingApproval,
-    ) -> anyhow::Result<PendingApproval> {
+    ) -> anyhow::Result<Self> {
         debug!("removing a pending approval");
         let removed_approval = match remove_pending_approval {
             RemovePendingApproval::MessageId(message_id) => {

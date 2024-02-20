@@ -28,14 +28,14 @@ impl EventHandler for Handler {
                 .depopulate_expired_approvals(&self.state.database)
                 .await
             {
-                error!("an error ocurred while de-populating expired approvals: {error:#?}")
+                error!("an error ocurred while de-populating expired approvals: {error:#?}");
             }
 
             if let Err(error) = pending_approvals
                 .populate_pending_approvals(&self.state.database)
                 .await
             {
-                error!("an error ocurred while populating pending approvals: {error:#?}")
+                error!("an error ocurred while populating pending approvals: {error:#?}");
             };
         }
     }
@@ -55,7 +55,7 @@ impl EventHandler for Handler {
                     error!(
                         "an error occurred while running `{}` interaction: {error:#?}",
                         command.data.name
-                    )
+                    );
                 }
             }
             Interaction::Component(component_interaction) => {
