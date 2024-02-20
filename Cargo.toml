@@ -2,6 +2,7 @@
 name = "yuri_every_hour_bot"
 description = "A botsin.space bot that sends wholesome and cute Yuri content every hour!"
 version = "0.0.0"
+publish = false
 edition = "2021"
 rust-version = "1.76.0"
 authors = ["tuhana <hi@tuhana.me>"]
