@@ -4,14 +4,18 @@ on:
   push:
     paths:
       - .github/workflows/ci.yaml
+      - .sqlx/*
       - src/**/*
+      - build.rs
       - Cargo.*
   pull_request:
     branches:
       - mistress
     paths:
       - .github/workflows/ci.yaml
+      - .sqlx/*
       - src/**/*
+      - build.rs
       - Cargo.*
   workflow_dispatch:
     inputs:
