@@ -39,7 +39,7 @@ pub async fn register_interactions(guild_id: GuildId, context: &Context) {
                 .collect::<Vec<String>>()
                 .join(", ")
         ),
-        Err(error) => error!("an error ocurred while registering guild interactions: {error:#?}"),
+        Err(error) => error!("an error occurred while registering guild interactions: {error:#?}"),
     }
 }
 

@@ -32,14 +32,14 @@ impl EventHandler for Handler {
             if let Err(error) =
                 PendingApproval::remove_expired_approvals(&self.state.database).await
             {
-                error!("an error ocurred while removing expired approvals: {error:#?}");
+                error!("an error occurred while removing expired approvals: {error:#?}");
             }
 
             if let Err(error) = pending_approvals
                 .populate_pending_approvals(&self.state.database)
                 .await
             {
-                error!("an error ocurred while populating pending approvals: {error:#?}");
+                error!("an error occurred while populating pending approvals: {error:#?}");
             };
         }
     }
