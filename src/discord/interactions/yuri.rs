@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use serenity::{
     all::{
-        ButtonStyle, ChannelId, CommandInteraction, CommandOptionType, Mention, ResolvedOption,
-        ResolvedValue,
+        ButtonStyle, ChannelId, CommandInteraction, CommandOptionType, CreateEmbedFooter, Mention,
+        ResolvedOption, ResolvedValue,
     },
     builder::{
         CreateActionRow, CreateButton, CreateCommand, CreateCommandOption, CreateEmbed,
@@ -89,7 +89,6 @@ impl YuriInteraction for YuriCInteraction {
                             "Submitted by {user_tag}",
                             user_tag = interaction.user.tag()
                         )))
-                        .timestamp(Timestamp::now())
                         .fields(vec![
                             ("Artist", submission_table.artist, true),
                             ("Art Link", submission_table.art_link, true),
@@ -101,6 +100,11 @@ impl YuriInteraction for YuriCInteraction {
                                 false,
                             ),
                         ])
+                        .timestamp(Timestamp::now())
+                        .footer(CreateEmbedFooter::new(format!(
+                            "Submission Id: {}",
+                            submission_table.submission_id
+                        )))
                         .image(submission_table.sample_image_url.unwrap_or_default());
 
                     let submission_approval_message =
