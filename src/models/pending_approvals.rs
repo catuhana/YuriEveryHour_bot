@@ -31,7 +31,7 @@ pub trait PendingApprovalHelpers {
 
     async fn remove_expired_approvals(
         executor: impl PgExecutor,
-    ) -> anyhow::Result<Vec<PendingApproval>>;
+    ) -> anyhow::Result<Option<Vec<PendingApproval>>>;
 }
 
 impl PendingApprovalHelpers for PendingApproval {
@@ -92,7 +92,9 @@ impl PendingApprovalHelpers for PendingApproval {
         Ok(removed_approval)
     }
 
-    async fn remove_expired_approvals(executor: impl PgExecutor<'_>) -> anyhow::Result<Vec<Self>> {
+    async fn remove_expired_approvals(
+        executor: impl PgExecutor<'_>,
+    ) -> anyhow::Result<Option<Vec<Self>>> {
         debug!("removing expired approvals");
 
         let expired_approvals = sqlx::query_as!(
@@ -106,6 +108,11 @@ impl PendingApprovalHelpers for PendingApproval {
         .fetch_all(executor)
         .await?;
 
+        if expired_approvals.is_empty() {
+            debug!("no expired approvals found to remove");
+            return Ok(None);
+        }
+
         debug!(
             "removed expired approvals with: `submission_id`s: {submission_ids}",
             submission_ids = expired_approvals
@@ -114,7 +121,7 @@ impl PendingApprovalHelpers for PendingApproval {
                 .collect::<Vec<String>>()
                 .join(", ")
         );
-        Ok(expired_approvals)
+        Ok(Some(expired_approvals))
     }
 }
 
@@ -173,11 +180,16 @@ impl PendingApprovalsHelpers for PendingApprovals {
     ) -> anyhow::Result<()> {
         debug!("populating pending approvals");
 
-        self.extend(
-            sqlx::query_as!(PendingApproval, "SELECT * FROM pending_approvals")
-                .fetch_all(executor)
-                .await?,
-        );
+        let pending_approvals = sqlx::query_as!(PendingApproval, "SELECT * FROM pending_approvals")
+            .fetch_all(executor)
+            .await?;
+
+        if pending_approvals.is_empty() {
+            debug!("no pending approvals found to populate");
+            return Ok(());
+        }
+
+        self.extend(pending_approvals);
 
         debug!("populated pending approvals");
         Ok(())
