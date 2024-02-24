@@ -16,10 +16,7 @@ impl Handler {
         interaction: &ComponentInteraction,
         context: &Context,
     ) -> anyhow::Result<()> {
-        debug!(
-            "handling an approval with: `message_id`: {message_id}",
-            message_id = interaction.message.id
-        );
+        debug!("handling an approval");
 
         let pending_approvals = &mut self.state.data.write().await.pending_approvals;
 
