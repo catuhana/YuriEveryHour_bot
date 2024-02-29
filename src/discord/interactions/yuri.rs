@@ -17,9 +17,9 @@ use serenity::{
 };
 
 use crate::{
-    discord::YuriState,
+    discord::{data::PendingApprovalsHelpers, YuriState},
     models::{
-        pending_approvals::{AddPendingApproval, PendingApprovalsHelpers},
+        pending_approvals::AddPendingApproval,
         submissions::{AddSubmission, Submission, SubmissionHelpers},
     },
 };
@@ -129,7 +129,6 @@ impl YuriInteraction for YuriCInteraction {
                         .data
                         .lock()
                         .await
-                        .pending_approvals
                         .add_pending_approval(
                             &state.database,
                             AddPendingApproval {

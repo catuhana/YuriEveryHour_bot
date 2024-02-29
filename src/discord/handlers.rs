@@ -3,9 +3,12 @@ use serenity::all::{
     CreateInteractionResponseMessage, EditMessage,
 };
 
-use crate::models::{
-    pending_approvals::{PendingApprovalsHelpers, RemovePendingApproval},
-    submissions::{Submission, SubmissionHelpers, SubmissionIds},
+use crate::{
+    discord::data::PendingApprovalsHelpers,
+    models::{
+        pending_approvals::RemovePendingApproval,
+        submissions::{Submission, SubmissionHelpers, SubmissionIds},
+    },
 };
 
 use super::event_handler::Handler;
@@ -18,18 +21,23 @@ impl Handler {
     ) -> anyhow::Result<()> {
         debug!("handling an approval");
 
-        let pending_approvals = &mut self.state.data.lock().await.pending_approvals;
+        let yuri_data = &mut self.state.data.lock().await;
 
-        if let Some(pending_approval) = pending_approvals.iter().find(|pending_approval| {
-            pending_approval.message_id == interaction.message.id.get() as i64
-        }) {
+        if let Some(pending_approval) = yuri_data
+            .pending_approvals
+            .iter()
+            .find(|pending_approval| {
+                pending_approval.message_id == interaction.message.id.get() as i64
+            })
+            .cloned()
+        {
             if chrono::Utc::now()
                 .naive_utc()
                 .signed_duration_since(pending_approval.date)
                 .num_days()
                 >= 1
             {
-                pending_approvals
+                yuri_data
                     .remove_pending_approval(
                         &self.state.database,
                         RemovePendingApproval::MessageId(interaction.message.id.get()),
@@ -73,7 +81,7 @@ impl Handler {
                         SubmissionIds::SubmissionId(pending_approval.submission_id),
                     )
                     .await?;
-                    pending_approvals
+                    yuri_data
                         .remove_pending_approval(
                             &mut *tx,
                             RemovePendingApproval::SubmissionId(pending_approval.submission_id),
@@ -103,7 +111,7 @@ impl Handler {
                         SubmissionIds::SubmissionId(pending_approval.submission_id),
                     )
                     .await?;
-                    pending_approvals
+                    yuri_data
                         .remove_pending_approval(
                             &mut *tx,
                             RemovePendingApproval::SubmissionId(pending_approval.submission_id),

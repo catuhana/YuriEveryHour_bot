@@ -9,11 +9,11 @@ use serenity::{
 use sqlx::PgPool;
 use tokio::sync::Mutex;
 
-use crate::{
-    config::{DiscordChannelConfig, DiscordConfig},
-    models::pending_approvals::PendingApproval,
-};
+use crate::config::{DiscordChannelConfig, DiscordConfig};
 
+use self::data::YuriData;
+
+mod data;
 mod event_handler;
 mod handlers;
 mod interactions;
@@ -27,10 +27,6 @@ pub struct YuriState {
     pub database: PgPool,
     pub config: YuriConfig,
     pub data: Arc<Mutex<YuriData>>,
-}
-
-pub struct YuriData {
-    pub pending_approvals: Vec<PendingApproval>,
 }
 
 pub struct YuriConfig {
@@ -51,7 +47,7 @@ impl YuriDiscord {
                     server_id: discord_config.server_id.into(),
                 },
                 data: Arc::new(Mutex::new(YuriData {
-                    pending_approvals: vec![],
+                    pending_approvals: Vec::default(),
                 })),
             }
             .into(),

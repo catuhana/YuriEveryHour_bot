@@ -4,10 +4,9 @@ use serenity::all::Interaction;
 use serenity::client::{Context, EventHandler};
 use serenity::model::gateway::Ready;
 
+use crate::discord::data::PendingApprovalsHelpers;
 use crate::discord::interactions::register_interactions;
-use crate::models::pending_approvals::{
-    PendingApproval, PendingApprovalHelpers, PendingApprovalsHelpers,
-};
+use crate::models::pending_approvals::{PendingApproval, PendingApprovalHelpers};
 
 use super::interactions::run_interactions;
 use super::{YuriDiscord, YuriState};
@@ -26,16 +25,15 @@ impl EventHandler for Handler {
 
         register_interactions(self.state.config.server_id, context).await;
 
+        let yuri_data = &mut self.state.data.lock().await;
         {
-            let pending_approvals = &mut self.state.data.lock().await.pending_approvals;
-
             if let Err(error) =
                 PendingApproval::remove_expired_approvals(&self.state.database).await
             {
                 error!("an error occurred while removing expired approvals: {error:#?}");
             }
 
-            if let Err(error) = pending_approvals
+            if let Err(error) = yuri_data
                 .populate_pending_approvals(&self.state.database)
                 .await
             {
