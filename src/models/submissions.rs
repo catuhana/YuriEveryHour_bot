@@ -33,32 +33,9 @@ pub struct AddSubmission {
     pub sample_image_url: Option<String>,
 }
 
-impl Default for Submission {
-    fn default() -> Self {
-        Self {
-            submission_id: 0,
-            user_id: 0,
-
-            artist: String::default(),
-            art_link: String::default(),
-            additional_information: None,
-
-            sample_image_url: None,
-
-            decision: None,
-
-            submission_date: chrono::Utc::now().naive_utc(),
-            submission_decision_date: None,
-        }
-    }
-}
-
-// UserId might be used later, so let it stay.
-// TODO: Remove if it has never been used for some time.
-#[allow(dead_code)]
 pub enum SubmissionIds {
     SubmissionId(i32),
-    UserId(u64),
+    // UserId(u64),
 }
 
 pub trait SubmissionHelpers {
@@ -128,16 +105,16 @@ impl SubmissionHelpers for Submission {
                 .fetch_one(executor)
                 .await?
             }
-            SubmissionIds::UserId(user_id) => {
-                sqlx::query_as!(
-                    Submission,
-                    r#"UPDATE submissions SET decision = 'approved', submission_decision_date = NOW() WHERE user_id = $1
-                    RETURNING submission_id, user_id, artist, art_link, additional_information, sample_image_url, decision as "decision: SubmissionDecision", submission_date, submission_decision_date"#,
-                    user_id as i64
-                )
-                .fetch_one(executor)
-                .await?
-            }
+            // SubmissionIds::UserId(user_id) => {
+            //     sqlx::query_as!(
+            //         Submission,
+            //         r#"UPDATE submissions SET decision = 'approved', submission_decision_date = NOW() WHERE user_id = $1
+            //         RETURNING submission_id, user_id, artist, art_link, additional_information, sample_image_url, decision as "decision: SubmissionDecision", submission_date, submission_decision_date"#,
+            //         user_id as i64
+            //     )
+            //     .fetch_one(executor)
+            //     .await?
+            // }
         };
 
         debug!(
@@ -164,16 +141,16 @@ impl SubmissionHelpers for Submission {
                 .fetch_one(executor)
                 .await?
             }
-            SubmissionIds::UserId(user_id) => {
-                sqlx::query_as!(
-                    Submission,
-                    r#"UPDATE submissions SET decision = 'rejected', submission_decision_date = NOW() WHERE user_id = $1
-                    RETURNING submission_id, user_id, artist, art_link, additional_information, sample_image_url, decision as "decision: SubmissionDecision", submission_date, submission_decision_date"#,
-                    user_id as i64
-                )
-                .fetch_one(executor)
-                .await?
-            }
+            // SubmissionIds::UserId(user_id) => {
+            //     sqlx::query_as!(
+            //         Submission,
+            //         r#"UPDATE submissions SET decision = 'rejected', submission_decision_date = NOW() WHERE user_id = $1
+            //         RETURNING submission_id, user_id, artist, art_link, additional_information, sample_image_url, decision as "decision: SubmissionDecision", submission_date, submission_decision_date"#,
+            //         user_id as i64
+            //     )
+            //     .fetch_one(executor)
+            //     .await?
+            // }
         };
 
         debug!(

@@ -27,7 +27,7 @@ impl EventHandler for Handler {
         register_interactions(self.state.config.server_id, context).await;
 
         {
-            let pending_approvals = &mut self.state.data.write().await.pending_approvals;
+            let pending_approvals = &mut self.state.data.lock().await.pending_approvals;
 
             if let Err(error) =
                 PendingApproval::remove_expired_approvals(&self.state.database).await

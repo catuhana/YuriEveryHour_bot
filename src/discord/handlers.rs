@@ -18,7 +18,7 @@ impl Handler {
     ) -> anyhow::Result<()> {
         debug!("handling an approval");
 
-        let pending_approvals = &mut self.state.data.write().await.pending_approvals;
+        let pending_approvals = &mut self.state.data.lock().await.pending_approvals;
 
         if let Some(pending_approval) = pending_approvals.iter().find(|pending_approval| {
             pending_approval.message_id == interaction.message.id.get() as i64

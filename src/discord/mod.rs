@@ -7,7 +7,7 @@ use serenity::{
     Client,
 };
 use sqlx::PgPool;
-use tokio::sync::RwLock;
+use tokio::sync::Mutex;
 
 use crate::{
     config::{DiscordChannelConfig, DiscordConfig},
@@ -26,7 +26,7 @@ pub struct YuriDiscord {
 pub struct YuriState {
     pub database: PgPool,
     pub config: YuriConfig,
-    pub data: Arc<RwLock<YuriData>>,
+    pub data: Arc<Mutex<YuriData>>,
 }
 
 pub struct YuriData {
@@ -50,7 +50,7 @@ impl YuriDiscord {
                     team: discord_config.team.iter().map(|id| (*id).into()).collect(),
                     server_id: discord_config.server_id.into(),
                 },
-                data: Arc::new(RwLock::new(YuriData {
+                data: Arc::new(Mutex::new(YuriData {
                     pending_approvals: vec![],
                 })),
             }

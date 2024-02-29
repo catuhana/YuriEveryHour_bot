@@ -127,7 +127,7 @@ impl YuriInteraction for YuriCInteraction {
 
                     state
                         .data
-                        .write()
+                        .lock()
                         .await
                         .pending_approvals
                         .add_pending_approval(
