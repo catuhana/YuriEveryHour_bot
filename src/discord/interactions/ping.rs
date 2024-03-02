@@ -4,7 +4,6 @@ use serenity::{
     all::{CommandInteraction, ResolvedOption},
     builder::{CreateCommand, CreateInteractionResponse, CreateInteractionResponseMessage},
     client::Context,
-    http::CacheHttp,
 };
 
 use crate::discord::YuriState;

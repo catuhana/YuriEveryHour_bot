@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use serenity::{
-    all::{CacheHttp, CommandInteraction, GuildId, ResolvedOption},
+    all::{CommandInteraction, GuildId, ResolvedOption},
     builder::CreateCommand,
     client::Context,
 };
