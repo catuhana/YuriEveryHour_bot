@@ -45,7 +45,7 @@ impl PendingApprovalHelpers for PendingApproval {
             sqlx::query_as!(PendingApproval,
             "INSERT INTO pending_approvals (submission_id, message_id) VALUES ($1, $2) RETURNING *",
             add_pending_approval.submission_id,
-            add_pending_approval.message_id as i64,
+            <u64 as TryInto<i64>>::try_into(add_pending_approval.message_id)?,
         )
             .fetch_one(executor)
             .await?;
@@ -68,7 +68,7 @@ impl PendingApprovalHelpers for PendingApproval {
                 sqlx::query_as!(
                     PendingApproval,
                     "DELETE FROM pending_approvals WHERE message_id = $1 RETURNING *",
-                    message_id as i64
+                    <u64 as TryInto<i64>>::try_into(message_id).unwrap()
                 )
                 .fetch_one(executor)
                 .await?

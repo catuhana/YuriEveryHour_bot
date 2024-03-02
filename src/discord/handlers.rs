@@ -27,7 +27,8 @@ impl Handler {
             .pending_approvals
             .iter()
             .find(|pending_approval| {
-                pending_approval.message_id == interaction.message.id.get() as i64
+                pending_approval.message_id
+                    == <u64 as TryInto<i64>>::try_into(interaction.message.id.get()).unwrap()
             })
             .cloned()
         {
@@ -62,7 +63,7 @@ impl Handler {
                 .http()
                 .get_message(
                     interaction.channel_id,
-                    (pending_approval.message_id as u64).into(),
+                    (<i64 as TryInto<u64>>::try_into(pending_approval.message_id)?).into(),
                 )
                 .await?;
 
