@@ -68,7 +68,7 @@ impl PendingApprovalHelpers for PendingApproval {
                 sqlx::query_as!(
                     PendingApproval,
                     "DELETE FROM pending_approvals WHERE message_id = $1 RETURNING *",
-                    <u64 as TryInto<i64>>::try_into(message_id).unwrap()
+                    <u64 as TryInto<i64>>::try_into(message_id)?
                 )
                 .fetch_one(executor)
                 .await?

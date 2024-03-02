@@ -23,15 +23,16 @@ impl Handler {
 
         let yuri_data = &mut self.state.data.lock().await;
 
-        if let Some(pending_approval) = yuri_data
-            .pending_approvals
-            .iter()
-            .find(|pending_approval| {
-                pending_approval.message_id
-                    == <u64 as TryInto<i64>>::try_into(interaction.message.id.get()).unwrap()
-            })
-            .cloned()
-        {
+        let mut pending_approval = None;
+        for approval in &yuri_data.pending_approvals {
+            if approval.message_id == <u64 as TryInto<i64>>::try_into(interaction.message.id.get())?
+            {
+                pending_approval = Some(approval.clone());
+                break;
+            }
+        }
+
+        if let Some(pending_approval) = pending_approval {
             if chrono::Utc::now()
                 .naive_utc()
                 .signed_duration_since(pending_approval.date)
