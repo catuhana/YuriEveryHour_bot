@@ -11,7 +11,6 @@ use serenity::{
         CreateMessage,
     },
     client::Context,
-    http::CacheHttp,
     model::Timestamp,
     utils::CreateQuickModal,
 };
@@ -26,8 +25,8 @@ use crate::{
 
 use super::YuriInteraction;
 
-pub struct YuriCInteraction;
-impl YuriInteraction for YuriCInteraction {
+pub struct Interaction;
+impl YuriInteraction for Interaction {
     fn register() -> CreateCommand<'static> {
         CreateCommand::new("yuri")
             .description("Submit a form for Yuri content addition!")
@@ -110,7 +109,7 @@ impl YuriInteraction for YuriCInteraction {
                     let submission_approval_message =
                         ChannelId::new(state.config.channels.approve_id)
                             .send_message(
-                                context.http(),
+                                context,
                                 CreateMessage::new()
                                     .content("New Yuri Submission!")
                                     .embed(embed.clone())
@@ -141,7 +140,7 @@ impl YuriInteraction for YuriCInteraction {
                     modal_response
                             .interaction
                             .create_response(
-                                context.http(),
+                                &context.http,
                                 CreateInteractionResponse::Message(
                                     CreateInteractionResponseMessage::new()
                                         .content(format!("Your Yuri addition has been submitted for review! After being approved, it will be posted to {vote_channel} for public voting.", vote_channel = Mention::from(ChannelId::new(state.config.channels.vote_id))))
@@ -151,10 +150,10 @@ impl YuriInteraction for YuriCInteraction {
                             .await?;
                 }
                 Err(error) => {
-                    error!("error submitting Yuri addition: {:#?}", error);
+                    error!("error submitting yuri addition: {:#?}", error);
 
                     modal_response.interaction.create_response(
-                        context.http(),
+                        &context.http,
                         CreateInteractionResponse::Message(
                             CreateInteractionResponseMessage::new()
                                 .content("An error occurred while submitting your Yuri addition, please try again.")

@@ -46,7 +46,7 @@ impl Handler {
 
                 interaction
                     .create_response(
-                        context.http(),
+                        &context.http,
                         CreateInteractionResponse::Message(
                             CreateInteractionResponseMessage::new()
                                 .content("This approval has been expired and removed.")
@@ -91,7 +91,7 @@ impl Handler {
 
                     pending_approval_message
                         .edit(
-                            context.http(),
+                            context,
                             EditMessage::new()
                                 .embed(
                                     embed
@@ -121,7 +121,7 @@ impl Handler {
 
                     pending_approval_message
                         .edit(
-                            context.http(),
+                            context,
                             EditMessage::new()
                                 .embed(
                                     embed
@@ -138,7 +138,7 @@ impl Handler {
             } else {
                 interaction
                     .create_response(
-                        context.http(),
+                        &context.http,
                         CreateInteractionResponse::Message(
                             CreateInteractionResponseMessage::new()
                                 .content("You don't have enough permissions to do that.")
@@ -150,7 +150,7 @@ impl Handler {
         } else {
             interaction
                 .create_response(
-                    context.http(),
+                    &context.http,
                     CreateInteractionResponse::Message(
                         CreateInteractionResponseMessage::new()
                             .content("This approval does not exist.")

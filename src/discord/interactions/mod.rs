@@ -25,12 +25,9 @@ pub trait YuriInteraction {
 pub async fn register_interactions(guild_id: GuildId, context: &Context) {
     debug!("registering guild interactions");
 
-    let interactions = &[
-        ping::PingInteraction::register(),
-        yuri::YuriCInteraction::register(),
-    ];
+    let interactions = &[ping::Interaction::register(), yuri::Interaction::register()];
 
-    match guild_id.set_commands(context.http(), interactions).await {
+    match guild_id.set_commands(&context.http, interactions).await {
         Ok(commands) => info!(
             "registered guild interactions: {registered_interactions}",
             registered_interactions = commands
@@ -51,8 +48,8 @@ pub async fn run_interactions(
     options: &[ResolvedOption<'_>],
 ) -> anyhow::Result<()> {
     match command_name {
-        "ping" => ping::PingInteraction::run(context, interaction, state, options).await,
-        "yuri" => yuri::YuriCInteraction::run(context, interaction, state, options).await,
+        "ping" => ping::Interaction::run(context, interaction, state, options).await,
+        "yuri" => yuri::Interaction::run(context, interaction, state, options).await,
         _ => Ok(()),
     }
 }

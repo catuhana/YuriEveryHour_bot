@@ -11,8 +11,8 @@ use crate::discord::YuriState;
 
 use super::YuriInteraction;
 
-pub struct PingInteraction;
-impl YuriInteraction for PingInteraction {
+pub struct Interaction;
+impl YuriInteraction for Interaction {
     fn register() -> CreateCommand<'static> {
         CreateCommand::new("ping").description("Pong!")
     }
@@ -25,7 +25,7 @@ impl YuriInteraction for PingInteraction {
     ) -> anyhow::Result<()> {
         interaction
             .create_response(
-                context.http(),
+                &context.http,
                 CreateInteractionResponse::Message(
                     CreateInteractionResponseMessage::new().content("Pong!"),
                 ),
