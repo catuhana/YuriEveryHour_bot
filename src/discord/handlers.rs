@@ -25,8 +25,7 @@ impl Handler {
 
         let mut pending_approval = None;
         for approval in &yuri_data.pending_approvals {
-            if approval.message_id == <u64 as TryInto<i64>>::try_into(interaction.message.id.get())?
-            {
+            if approval.message_id == i64::try_from(interaction.message.id.get())? {
                 pending_approval = Some(approval.clone());
                 break;
             }
@@ -64,7 +63,7 @@ impl Handler {
                 .http()
                 .get_message(
                     interaction.channel_id,
-                    (<i64 as TryInto<u64>>::try_into(pending_approval.message_id)?).into(),
+                    (u64::try_from(pending_approval.message_id)?).into(),
                 )
                 .await?;
 

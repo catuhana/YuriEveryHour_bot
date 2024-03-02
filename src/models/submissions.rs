@@ -72,7 +72,7 @@ impl SubmissionHelpers for Submission {
             r#"INSERT INTO submissions(user_id, artist, art_link, additional_information, sample_image_url)
             VALUES ($1, $2, $3, $4, $5)
             RETURNING submission_id, user_id, artist, art_link, additional_information, sample_image_url, decision as "decision: SubmissionDecision", submission_date, submission_decision_date"#,
-            <u64 as TryInto<i64>>::try_into(submission.user_id)?,
+            i64::try_from(submission.user_id)?,
             submission.artist,
             submission.art_link,
             submission.additional_information,
