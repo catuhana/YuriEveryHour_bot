@@ -13,7 +13,7 @@ lto = "thin"
 
 [dependencies]
 anyhow = "1.0.81"
-async-trait = "0.1.78"
+async-trait = "0.1.79"
 chrono = "0.4.35"
 clap = { version = "4.5.3", features = ["env", "derive"] }
 dirs = "5.0.1"
