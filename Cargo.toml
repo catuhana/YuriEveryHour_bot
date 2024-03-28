@@ -14,7 +14,7 @@ lto = "thin"
 [dependencies]
 anyhow = "1.0.81"
 async-trait = "0.1.79"
-chrono = "0.4.35"
+chrono = "0.4.37"
 clap = { version = "4.5.4", features = ["env", "derive"] }
 dirs = "5.0.1"
 figment = { version = "0.10.15", features = ["env", "yaml"] }
